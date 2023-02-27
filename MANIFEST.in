@@ -1,0 +1,8 @@
+recursive-include docs/source *
+include docs/Makefile docs/make.bat docs/requirements.txt
+
+include setup.py
+include README.rst
+include README.zh_CN.rst
+include MANIFEST.in
+recursive-include pymdfs/config *.yml
