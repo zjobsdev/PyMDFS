@@ -13,9 +13,9 @@ It contains main features as following,
 #. Major data structures are pandas.DataFrame/xarray.DataArray
 
 README
-======
+^^^^^^
 
-- `简体中文 <https://github.com/wqshen/pymdfs/blob/master/README.zh_CN.rst>`_
+- `简体中文 <https://github.com/zjobsdev/pymdfs/blob/master/README.zh_CN.rst>`_
 
 Install
 ^^^^^^^
@@ -38,8 +38,8 @@ from GDS server, clip longitude and latitude extent.
 
 **Key Point**
 
-- The first argument of `MdfsClient`_ is GDS server address and port.
-- `MdfsClient.sel`_ is the frontend interface to fetch data in GDS,
+- The first argument of **MdfsClient** is GDS server address and port.
+- **MdfsClient.sel** is the frontend interface to fetch data in GDS,
   using several arguments,
 
   - `datasource`, top directory name in GDS server

@@ -75,7 +75,7 @@ html_favicon = '_static/distribution_32px.ico'
 html_theme_options = {
     'logo_only': True,
     'display_version': False,
-    'github_url': "https://github.com/wqshen/PyMDFS",
+    'github_url': "https://github.com/zjobsdev/PyMDFS",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

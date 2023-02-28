@@ -15,9 +15,9 @@ PyMDFS主要包含以下特征，
    和 `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_
 
 README
-======
+^^^^^^
 
-- `English <https://github.com/wqshen/pymdfs/blob/master/README.rst>`_
+- `English <https://github.com/zjobsdev/pymdfs/blob/master/README.rst>`_
 
 安装方法
 ^^^^^^^^^^^^^^^
@@ -35,14 +35,14 @@ README
 从 *Micaps* GDS 服务器中读取数据
 ---------------------------------------------------------------------------
 
-`pymdfs <https://github.com/wqshen/pymdfs>`_ 中最常用的类为 `MdfsClient`_ ，
+`pymdfs <https://github.com/zjobsdev/pymdfs>`_ 中最常用的类为 **MdfsClient** ，
 它承担了从 GDS 服务器中读取数据和裁剪经纬度的重要功能。
 
 
 **MdfsClient 介绍**
 
-- 实例化 `MdfsClient`_ 类时使用 GDS server `address` and `port`.
-- `MdfsClient.sel`_  拉取 GDS 数据的前端接口，通过一下多个参数组合实现其功能,
+- 实例化 **MdfsClient** 类时使用 GDS server `address` and `port`.
+- **MdfsClient**  拉取 GDS 数据的前端接口，通过一下多个参数组合实现其功能,
 
   - `datasource`, GDS 服务器中子类数据的顶级路径
   - `inittime`, 数值模式的起报时间或观测数据的观测时间
@@ -53,7 +53,7 @@ README
   - `lon`, 经度切片
   - `wildcard`, 文件名通配符，如未提供此参数，程序将自动解析，但将增加运行时间
 
-以下程序，使用 `MdfsClient`_ 拉取 0.125度的 ECWMF 在北京时间2023年2月20日20时起报的未来24小时的相对湿度。
+以下程序，使用 **MdfsClient** 拉取 0.125度的 ECWMF 在北京时间2023年2月20日20时起报的未来24小时的相对湿度。
 
 .. code:: python
 

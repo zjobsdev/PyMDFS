@@ -40,7 +40,7 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     long_description=open('README.rst', 'r', encoding='utf8').read(),
-    url='https://github.com/wqshen/PyMDFS',
+    url='https://github.com/zjobsdev/PyMDFS',
     entry_points={
         'console_scripts': [
             'mdfs_dump=pymdfs.client_dump:_main',
