@@ -150,7 +150,7 @@ class Diamond14:
                 idx += 1
 
                 # line xyz
-                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 line_xyz.append(xyz)
                 idx += xyz_num * 3
@@ -168,7 +168,7 @@ class Diamond14:
                 # label xyz
                 if label_num > 0:
                     label_xyz = np.array(
-                        data[idx:(idx + 3 * label_num)]).astype(np.float)
+                        data[idx:(idx + 3 * label_num)]).astype(float)
                     label_xyz.shape = [label_num, 3]
                     line_label_xyz.append(label_xyz)
                     idx += label_num * 3
@@ -214,7 +214,7 @@ class Diamond14:
                 idx += 1
 
                 # line symbol xyz
-                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 linesym_xyz.append(xyz)
                 idx += xyz_num * 3
@@ -254,7 +254,7 @@ class Diamond14:
                 idx += 1
 
                 # symbol xyz
-                xyz = np.array(data[idx:(idx + 3)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3)]).astype(float)
                 symbol_xyz.append(xyz)
                 idx += 3
 
@@ -296,7 +296,7 @@ class Diamond14:
                 idx += 1
 
                 # line xyz
-                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 cn_xyz.append(xyz)
                 idx += 3 * xyz_num
@@ -314,7 +314,7 @@ class Diamond14:
                 # label xyz
                 if label_num > 0:
                     label_xyz = np.array(
-                        data[idx:(idx + 3 * label_num)]).astype(np.float)
+                        data[idx:(idx + 3 * label_num)]).astype(float)
                     label_xyz.shape = [3, label_num]
                     cn_label_xyz.append(label_xyz)
                     idx += label_num * 3
@@ -363,7 +363,7 @@ class Diamond14:
 
                 # region xyz point
                 xyz = np.array(
-                    data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                    data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 weather_region_xyz.append(xyz)
                 idx += 3 * xyz_num
@@ -408,7 +408,7 @@ class Diamond14:
 
                 # xyz point
                 xyz = np.array(
-                    data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                    data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 fillarea_xyz.append(xyz)
                 idx += 3 * xyz_num
@@ -419,17 +419,17 @@ class Diamond14:
                 idx += 1
 
                 # line color
-                color = np.array(data[idx:(idx + 4)]).astype(np.int)
+                color = np.array(data[idx:(idx + 4)]).astype(int)
                 fillarea_color.append(color)
                 idx += 4
 
                 # front color
-                front_color = np.array(data[idx:(idx + 4)]).astype(np.int)
+                front_color = np.array(data[idx:(idx + 4)]).astype(int)
                 fillarea_frontcolor.append(front_color)
                 idx += 4
 
                 # background color
-                back_color = np.array(data[idx:(idx + 4)]).astype(np.int)
+                back_color = np.array(data[idx:(idx + 4)]).astype(int)
                 fillarea_backcolor.append(back_color)
                 idx += 4
 
@@ -487,7 +487,7 @@ class Diamond14:
                 idx += 1
 
                 # xyz
-                xyz = np.array(data[idx:(idx + 3)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3)]).astype(float)
                 nsymbol_xyz.append([xyz])
                 idx += 3
 
@@ -527,7 +527,7 @@ class Diamond14:
                 idx += 1
 
                 # color
-                color = np.array(data[idx:(idx + 4)]).astype(np.int)
+                color = np.array(data[idx:(idx + 4)]).astype(int)
                 nsymbol_color.append(color)
                 idx += 4
 
@@ -577,7 +577,7 @@ class Diamond14:
                 idx += 1
 
                 # line color
-                color = np.array(data[idx:(idx + 4)]).astype(np.int)
+                color = np.array(data[idx:(idx + 4)]).astype(int)
                 plinesym_color.append([color])
                 idx += 4
 
@@ -597,7 +597,7 @@ class Diamond14:
                 idx += 1
 
                 # line symbol xyz
-                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(np.float)
+                xyz = np.array(data[idx:(idx + 3 * xyz_num)]).astype(float)
                 xyz.shape = [xyz_num, 3]
                 plinesym_xyz.append(xyz)
                 idx += 3 * xyz_num
@@ -615,7 +615,7 @@ class Diamond14:
                 # label xyz
                 if label_num > 0:
                     label_xyz = np.array(
-                        data[idx:(idx + 3 * label_num)]).astype(np.float)
+                        data[idx:(idx + 3 * label_num)]).astype(float)
                     label_xyz.shape = [label_num, 3]
                     plinesym_label_xyz.append(label_xyz)
                     idx += label_num * 3

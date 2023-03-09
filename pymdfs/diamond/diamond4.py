@@ -46,6 +46,16 @@ class Diamond4Head:
             field_value = getattr(self, field.name)
             setattr(self, field.name, field.type(field_value))
 
+    def __repr__(self):
+        _str = []
+        for field in fields(cast(dataclass, self)):
+            field_value = getattr(self, field.name)
+            if isinstance(field_value, float):
+                _str.append(f"{field_value:.5f}")
+            else:
+                _str.append(str(field_value))
+        return "\t".join(_str[:3]) + "\n" + "\t".join(_str[3:9]) + "\n" + "\t".join(_str[9:])
+
 
 @dataclass
 class Diamond4:
@@ -132,12 +142,8 @@ class Diamond4:
             float format to save data
         """
         with open(pathfile, 'w', encoding=encoding) as f:
-            head = tuple(map(str, astuple(self.head)))
-            f.write("\t".join(head[:3]) + "\n")
-            f.write("\t".join(head[3:9]) + "\n")
-            f.write("\t".join(head[9:22]) + "\n")
-
-            np.savetxt(f, self.data, fmt=fmt, delimiter='\t')
+            f.write(self.head.__repr__() + "\n")
+            np.savetxt(f, self.data.squeeze(), fmt=fmt, delimiter='\t')
 
     def to_netcdf(self, pathfile: str, name: str, complevel: int = 5):
         """write data into NetCDF4 file
@@ -161,8 +167,12 @@ class Diamond4:
     def from_xarray(self, darray: xr.DataArray):
         """convert xarray into Diamond4"""
         desc = getattr(darray, 'long_name', 'Unknown')
-        time = getattr(darray, 'time', datetime(1900, 1, 1, 0))
-        it = pd.to_datetime(time)
+        it = getattr(darray, 'time', datetime(1900, 1, 1, 0))
+        if not isinstance(it, datetime):
+            it = it.values
+            if isinstance(it, np.datetime64):
+                it = [it]
+            it = pd.to_datetime(it)[0]
         duration = getattr(darray, 'step', 0)
         level = getattr(darray, 'level', 0)
         xinterval = darray.lon[1] - darray.lon[0]
@@ -172,8 +182,8 @@ class Diamond4:
         endlon = darray.lon.max()
         endlat = darray.lat.max()
         xsize, ysize = darray.shape[-1], darray.shape[-2]
-        startvalue = darray.min().floor()
-        endvalue = darray.max().ceil()
+        startvalue = np.floor(darray.min().values)
+        endvalue = np.ceil(darray.max().values)
         lineinteravl = (endvalue - startvalue) / 20.
         self.head = Diamond4Head('diamond', 4, desc, it.year, it.month, it.day, it.hour, duration,
                                  level, xinterval, yinterval, startlon, endlon, startlat, endlat,
@@ -208,7 +218,7 @@ class Diamond4:
                             name=name)
         # To mask potential missing values
         if self.missing_value is not None:
-            data = data.where(data == self.missing_value)
+            data = data.where(data != self.missing_value)
         # Append extra attributes to netcdf varibale
         data.attrs['description'] = self.head.description
         data.attrs['inittime'] = inittime
@@ -228,3 +238,7 @@ class Diamond4:
     def __repr__(self):
         """print"""
         return self.head.__repr__()
+
+    @property
+    def values(self):
+        return self._ds

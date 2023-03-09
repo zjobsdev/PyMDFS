@@ -25,6 +25,7 @@ It contains main features as following,
 
    install
    quick_start
+   nc_to_diamond4
    scripts
    datasource
    api

@@ -12,6 +12,7 @@ client
 mdfs
 ----
 
+Data interface to micaps 4 gird and station binary data.
 
 MdfsGridData
 +++++++++++++++
@@ -29,6 +30,8 @@ MdfsStationData
 
 Diamond
 -------
+
+Data interface to micaps text data.
 
 Diamond1
 +++++++++++++++
@@ -110,6 +113,8 @@ Diamond42
 
 LatLon
 ------
+
+Data interface to radar mosaic data (.latlon).
 
 .. automodule:: pymdfs.latlon
     :members:
