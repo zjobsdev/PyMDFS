@@ -177,10 +177,9 @@ class Diamond11:
         # Append extra attributes to netcdf varibale
         var_x.attrs['description'] = self.head.description + "_" + name[0]
         var_y.attrs['description'] = self.head.description + "_" + name[1]
-        var_x.attrs['inittime'] = datetime(self.head.year, self.head.month, self.head.day,
-                                           self.head.hour)
-        var_y.attrs['inittime'] = datetime(self.head.year, self.head.month, self.head.day,
-                                           self.head.hour)
+        inittime = datetime(self.head.year, self.head.month, self.head.day, self.head.hour)
+        var_x.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
+        var_y.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
         var_x.attrs['fh'] = self.head.duration
         var_y.attrs['fh'] = self.head.duration
 

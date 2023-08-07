@@ -1,7 +1,7 @@
 Command line procedures
 =======================
 
-1. client_query
+1. mdfs_query
 ----------------
 
 usage:
@@ -28,9 +28,9 @@ Example:
 
 .. code:: python
 
-    client_query ECMWF_HR
+    mdfs_query ECMWF_HR
 
-2. client_dump
+2. mdfs_dump
 ----------------
 
 usage:
@@ -81,4 +81,4 @@ Example:
 
 .. code:: shell
 
-     client_dump ECMWF_HR 2023021920 -f 24 --level 500 -v RH,UGRD,VGRD,TMP,HGT -e ECMWF_HR.2023021920.nc
+     mdfs_dump ECMWF_HR 2023021920 -f 24 --level 500 -v RH,UGRD,VGRD,TMP,HGT -e ECMWF_HR.2023021920.nc

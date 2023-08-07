@@ -12,9 +12,7 @@ it is easy to convert data format between netCDF (.nc) grid data and Micaps Diam
 
     # read Diamond 4 data and save to netCDF format
     ds = diamond4.Diamond4(pathfile=your_diamond4_data_path)
-    dar = ds.values
-    dar.name = 'varibale_name'
-    dar.to_netcdf('the_output_netcdf_file_path.nc')
+    ds.to_netcdf('the_output_netcdf_file_path.nc', name='VarName')
 
     # instance a Diamond4 class
     d4 = diamond4.Diamond4()

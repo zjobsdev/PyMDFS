@@ -30,20 +30,21 @@ initial at 2023-02-20 20:00 (BT) and lead at 24 hours later.
     from datetime import datetime
     from pymdfs import MdfsClient
 
-    gds = MdfsClient('10.xxx.xxx.xxx:8080')
+    gds = MdfsClient('xx.xxx.xxx.xxx:xxxx')
     dar = gds.sel('ECMWF_HR', datetime(2023, 2, 20, 20), fh=24, varname='RH',
                   level=850, lat=slice(20, 40), lon=slice(110, 130))
     print(dar)
 
 
-Following is an example to fetch
+Following is an example to fetch observational 24-hour station rainfall at 2023-02-20 20:00 (BT),
+within the extent of 20N-40N,110E-130E.
 
 .. code:: python
 
     from datetime import datetime
     from pymdfs import MdfsClient
 
-    gds = MdfsClient('10.xxx.xxx.xxx:8080')
+    gds = MdfsClient('xx.xxx.xxx.xxx:xxxx')
     df = gds.sel('SURFACE', datetime(2023, 2, 20, 20), varname='RAIN24_ALL_STATION',
                  lat=slice(20, 40), lon=slice(110, 130))
     print(df)

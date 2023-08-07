@@ -81,26 +81,48 @@ class MdfsGridData(object):
         return dar
 
     def read(self, path_or_bytes: Union[str, bytes]):
+        def read_block(bytes_arr, p: int = 0):
+            head_data = unpack('=4sh20s50s30sfiiiiiifffifffifff100s', bytes_arr[p:p + 278])
+            head = MdfsGridHead(*head_data)
+            n_points = head.latitudeGridNumber * head.longitudeGridNumber
+            body_data = np.frombuffer(bytes_arr[p + 278:p + 278 + n_points * 4],
+                                      '{}f'.format(n_points))
+            data = np.array(body_data).reshape(head.longitudeGridNumber,
+                                               head.latitudeGridNumber)
+            if head.dtype == 11:
+                p = 278 + data.size * 4
+                block_size = p + data.size * 4
+                body_data_angle = unpack('{}f'.format(data.size), bytes_array[p:block_size])
+                data_angle = np.array(body_data_angle).reshape(head.longitudeGridNumber,
+                                                               head.latitudeGridNumber)
+                data = {'magnitude': data, 'angle': data_angle}
+            return head, data
+
         if isinstance(path_or_bytes, str):
             with open(path_or_bytes, 'rb') as f:
                 bytes_array = f.read()
         else:
             bytes_array = path_or_bytes
-        head_data = unpack('=4sh20s50s30sfiiiiiifffifffifff100s', bytes_array[:278])
-        self.head = MdfsGridHead(*head_data)
-        n_points = self.head.latitudeGridNumber * self.head.longitudeGridNumber
-        body_data = np.frombuffer(bytes_array[278:278 + n_points * 4], '{}f'.format(n_points))
-        data = np.array(body_data).reshape(self.head.longitudeGridNumber,
-                                           self.head.latitudeGridNumber)
-        if self.head.dtype == 11:
-            self.data = {'magnitude': data}
-            p = 278 + n_points * 4
-            body_data_angle = unpack('{}f'.format(n_points), bytes_array[p:p + n_points * 4])
-            self.data['angle'] = np.array(body_data_angle).reshape(self.head.longitudeGridNumber,
-                                                                   self.head.latitudeGridNumber)
+        self.head, self.data = read_block(bytes_array)
+        nbytes = len(bytes_array)
+        size = self.head.latitudeGridNumber * self.head.longitudeGridNumber
+        block_size = 278 + size * 4 * (2 if self.head.dtype == 11 else 1)
+        if nbytes > block_size and nbytes % block_size == 0:
+            heads = [self.head]
+            datas = [self.data]
+            nblocks = int(nbytes / block_size)
+            _ds = [self.to_xarray(name=self.head.element)]
+            for i in range(1, nblocks):
+                self.head, self.data = read_block(bytes_array[block_size * i:block_size * (i + 1)])
+                heads.append(self.head)
+                datas.append(self.data)
+                _ds.append(self.to_xarray(name=self.head.element))
+            self.data = datas
+            self.head = heads
+            self._ds = xr.concat(_ds, dim=xr.DataArray(range(len(_ds)), dims='number')).transpose('time', ...)
         else:
-            self.data = data
-        self._ds = self.to_xarray(name=self.head.element)
+            self._ds = self.to_xarray(name=self.head.element)
+        return self.data
 
     def to_xarray(self, name=None):
         def set_mask_and_attrs(data):
@@ -111,7 +133,7 @@ class MdfsGridData(object):
             # Append extra attributes to netcdf varibale
             data.attrs['model'] = self.head.modelName
             data.attrs['description'] = self.head.description
-            data.attrs['inittime'] = inittime
+            data.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
             data.attrs['fh'] = fh
 
             if self.pathfile is not None:

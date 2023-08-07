@@ -221,7 +221,7 @@ class Diamond4:
             data = data.where(data != self.missing_value)
         # Append extra attributes to netcdf varibale
         data.attrs['description'] = self.head.description
-        data.attrs['inittime'] = inittime
+        data.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
         data.attrs['fh'] = fh
 
         if self.pathfile is not None:

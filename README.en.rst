@@ -1,59 +1,60 @@
+
+
 PyMDFS
 ======
 
-高级的、易用的 Micaps 在线数据读取包。
+A high level and easy-to-use Micaps MDFS data online reader package.
 
-PyMDFS主要包含以下特征，
+It contains main features as following,
 
-
-#. 在线读取Micaps GDS服务器数据，模式、观测、卫星、雷达等
-#. 读写Micaps Diamond数据，读取Micaps网络存储二进制格式数据
-#. 读取卫星产品数据 (AWX)
-#. 读取天气雷达拼图数据 (.LATLON)
-#. 过滤站点和经纬度裁剪
-#. 主要的数据结构为`pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
-   和 `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_
+#. Online client to read data from GDS server
+#. Read Micaps diamond (write support) and Micaps 4 Grid/Stations files.
+#. Read satellite product data file (AWX)
+#. Read weather radar mosaic product file (.LATLON)
+#. Filter stations data or clip grid data
+#. Major data structures are pandas.DataFrame/xarray.DataArray
 
 README
 ^^^^^^
 
-- `English <https://github.com/zjobsdev/pymdfs/blob/master/README.rst>`_
+- `简体中文 <https://github.com/zjobsdev/pymdfs/blob/master/README.rst>`_
 
-安装方法
-^^^^^^^^^^^^^^^
+Install
+^^^^^^^
 
-使用 *pip* 可以直接安装
+use pip install pymdfs
 
 .. code:: shell
 
     pip install pymdfs
 
 
-简单上手
-^^^^^^^^^^^^^^^
+Quick Start
+^^^^^^^^^^^
 
-从 *Micaps* GDS 服务器中读取数据
----------------------------------------------------------------------------
+Read data from Micaps GDS server
+------------------------------------
 
-`pymdfs <https://github.com/zjobsdev/pymdfs>`_ 中最常用的类为 **MdfsClient** ，
-它承担了从 GDS 服务器中读取数据和裁剪经纬度的重要功能。
+The most useful class in pymdfs is MdfsClient, you can use it to fetch data
+from GDS server, clip longitude and latitude extent.
 
+**Key Point**
 
-**MdfsClient 介绍**
+- The first argument of **MdfsClient** is GDS server address and port.
+- **MdfsClient.sel** is the frontend interface to fetch data in GDS,
+  using several arguments,
 
-- 实例化 **MdfsClient** 类时使用 GDS server `address` and `port`.
-- **MdfsClient**  拉取 GDS 数据的前端接口，通过一下多个参数组合实现其功能,
+  - `datasource`, top directory name in GDS server
+  - `inittime`, initial datetime of model or observation datetime,
+  - `fh`, forecast hour of model, only valid for model data
+  - `varname`, variable name, / joined middle directories
+  - `level`, model pressure level, only valid for model data
+  - `lat`, slice extent for latitude
+  - `lon`, slice extent for longitude
+  - `wildcard`, file name wildcard, runtime can be speedup if offered
 
-  - `datasource`, GDS 服务器中子类数据的顶级路径
-  - `inittime`, 数值模式的起报时间或观测数据的观测时间
-  - `fh`, 模式预报时效（仅针对模式数据）
-  - `varname`, 变量名, 对应于子类数据路径后移植到最后的数据目录路径，以 */* 连接
-  - `level`, 模式垂直层（仅针对模式数据）
-  - `lat`, 维度切片
-  - `lon`, 经度切片
-  - `wildcard`, 文件名通配符，如未提供此参数，程序将自动解析，但将增加运行时间
-
-以下程序，使用 **MdfsClient** 拉取 0.125度的 ECWMF 在北京时间2023年2月20日20时起报的未来24小时的相对湿度。
+Following is an example to fetch 0.125x0.125 ECMWF forecasted relative humidity field,
+initial at 2023-02-20 20:00 (BT) and lead at 24 hours later.
 
 .. code:: python
 
@@ -66,21 +67,35 @@ README
     print(dar)
 
 
-命令行程序
-^^^^^^^^^^^^^^^^^^^^^^
+Following is an example to fetch observational 24-hour station rainfall at 2023-02-20 20:00 (BT),
+within the extent of 20N-40N,110E-130E.
+
+.. code:: python
+
+    from datetime import datetime
+    from pymdfs import MdfsClient
+
+    gds = MdfsClient('xxx.xxx.xxx.xxx:xxxx')
+    df = gds.sel('SURFACE', datetime(2023, 2, 20, 20), varname='RAIN24_ALL_STATION',
+                 lat=slice(20, 40), lon=slice(110, 130))
+    print(df)
+
+
+Command line procedures
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. client_query
 ----------------
 
-用法:
+usage:
     mdfs_query [-h] [-s SERVER] [-o LOGLEVEL] datasource
 
-MDFS数据变量查询
+MDFS Data Query
 
-位置参数:
-  datasource            数据名称
+positional arguments:
+  datasource,            data source name
 
-可选参数:
+optional arguments:
     +----------------------------------+---------------------------------+
     | arguments                        | Description                     |
     +==================================+=================================+
@@ -92,7 +107,7 @@ MDFS数据变量查询
     +----------------------------------+---------------------------------+
 
 
-示例:
+Example:
 
 .. code:: python
 
@@ -101,12 +116,12 @@ MDFS数据变量查询
 2. client_dump
 ----------------
 
-用法:
+usage:
     mdfs_dump [-h] [-f FH] [-e OUTFILE] [-c COMPLEVEL] [-v VARNAME] [-x LON] [-y LAT] [-p LEVEL] [-t OFFSET_INITTIME] [--name_map NAME_MAP] [-s SERVER] [-o LOGLEVEL] datasource inittime
 
-MDFS数据读取下载
+MDFS Data Dumper
 
-位置参数:
+positional arguments:
     +-------------+------------------------------------------------+
     | arguments   | Description                                    |
     +=============+================================================+
@@ -115,7 +130,7 @@ MDFS数据读取下载
     | inittime    | model initial datetime or observation datetime |
     +-------------+------------------------------------------------+
 
-可选参数:
+optional arguments:
     +-------------------------------------------------------+-------------------------------------+
     | arguments                                             | Description                         |
     +=======================================================+=====================================+
@@ -144,11 +159,12 @@ MDFS数据读取下载
     | -o LOGLEVEL, --loglevel LOGLEVEL                      | logger level in number              |
     +-------------------------------------------------------+-------------------------------------+
 
-示例:
+
+Example:
 
 .. code:: shell
 
      client_dump ECMWF_HR 2023021920 -f 24 --level 500 -v RH,UGRD,VGRD,TMP,HGT -e ECMWF_HR.2023021920.nc
 
 
-更多细节和特征，请参与项目文档 `readthedocs <www.pymdfs.readthedocs.org>`_ .
+More details and features please go to the docs hosted at `readthedocs <www.pymdfs.readthedocs.org>`_ .
