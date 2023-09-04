@@ -18,7 +18,7 @@ install_requires = [
     "pyyaml",
     "protobuf<=3.20",
     "retrying",
-    "httplib2"
+    "httplib2",
     "netCDF4<=1.5.8",
 ]
 
