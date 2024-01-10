@@ -10,6 +10,7 @@ import yaml
 import itertools
 import numpy as np
 import pandas as pd
+from datetime import datetime
 from typing import Optional, Union, Any, cast
 from struct import unpack, calcsize
 from collections import OrderedDict
@@ -145,6 +146,8 @@ class MdfsStationData(object):
                 data[data_head[0]] = element
         self.data = data
         self._ds = self.to_dataframe()
+        self._ds.insert(0, '观测时间', datetime(*[getattr(self.head, k)
+                                                  for k in ('year', 'month', 'day', 'hour', 'minute', 'second')]))
 
     @property
     def _element_type_dict(self) -> dict:

@@ -216,12 +216,12 @@ class Diamond4:
         data = xr.DataArray(self.data[None, ...], dims=('time', 'lat', 'lon'),
                             coords={'time': [leadtime], 'lat': lats, 'lon': lons},
                             name=name)
+        data = data.assign_coords(inittime=xr.DataArray([inittime], dims='time'))
         # To mask potential missing values
         if self.missing_value is not None:
             data = data.where(data != self.missing_value)
         # Append extra attributes to netcdf varibale
         data.attrs['description'] = self.head.description
-        data.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
         data.attrs['fh'] = fh
 
         if self.pathfile is not None:

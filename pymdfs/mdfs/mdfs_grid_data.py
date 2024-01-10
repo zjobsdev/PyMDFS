@@ -131,9 +131,10 @@ class MdfsGridData(object):
                 data = data.where(data == self.missing_value)
 
             # Append extra attributes to netcdf varibale
+            data = data.assign_coords(inittime=xr.DataArray([inittime], dims='time'))
             data.attrs['model'] = self.head.modelName
             data.attrs['description'] = self.head.description
-            data.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
+            # data.attrs['inittime'] = f"{inittime:%Y-%m-%d %H:%M}"
             data.attrs['fh'] = fh
 
             if self.pathfile is not None:

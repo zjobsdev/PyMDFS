@@ -8,13 +8,16 @@ import os
 import re
 import inspect
 import importlib
+import pandas as pd
+import xarray as xr
+from copy import copy
 from struct import unpack
 from httplib2 import Http
 from logzero import logger
 from retrying import retry
-from datetime import datetime
 from itertools import product
 from urllib.parse import urljoin
+from datetime import datetime, timedelta
 from google.protobuf.message import DecodeError
 from .mdfs import DataBlock_pb2 as DataBlock
 
@@ -34,16 +37,16 @@ class MdfsClient(Http):
         super(MdfsClient, self).__init__()
         self.__basicUrl = f"http://{address}/DataService"
 
-    def sel(self, datasource, inittime, fh=None, varname=None, **kwargs):
+    def sel(self, datasource, inittime=None, fh=None, varname=None, leadtime=None, merge=False, **kwargs):
         """interface to select variable from file by given more filter and clip parameters
 
         Parameters
         ----------
         datasource (str): data source name, see Registry/DATA
-        inittime (datetime): model initial datetime or observation datetime
-        fh (int): forecast hour
-        varname (str): variable name
-        timeout (int): timeout to collect data
+        inittime (datetime, list): model initial datetime or observation datetime
+        fh (int, list): forecast hour
+        varname (str, list): variable name
+        leadtime (datetime): lead time, only valid for model data
         kwargs (dict): other k/v arguments passed to `sel` method of specific reader
 
         Returns
@@ -51,25 +54,44 @@ class MdfsClient(Http):
         (xarray.DataArray, list[xarray.DataArray]): Readed variable in xarray.DataArray
         """
         datasource = [datasource] if isinstance(datasource, str) else datasource
-        inittime = [inittime] if isinstance(inittime, datetime) else inittime
+        inittime = [inittime] if isinstance(inittime, datetime) or inittime is None else inittime
         fh = [fh] if isinstance(fh, int) or fh is None else fh
         varname = [varname] if isinstance(varname, str) or varname is None else varname
-        requests = list(product(datasource, inittime, fh, varname))
-        datas = [None] * len(requests)
+        leadtime = [leadtime] if isinstance(leadtime, datetime) or leadtime is None else leadtime
+        requests = list(product(datasource, inittime, fh, varname, leadtime))
 
-        for i, request in enumerate(requests):
-            logger.debug("{}".format(requests))
+        def fetch(request):
             try:
-                data = self._sel(*request, **kwargs)
+                return self._sel(*request, **kwargs)
             except Exception as e:
                 logger.exception("Worker: {} - {}".format(request, e))
-                continue
-            datas[i] = data
-        if all(v is None for v in datas):
-            raise Exception("All requests failed.")
-        return datas if len(requests) > 1 else datas[0]
+                return
 
-    def _sel(self, datasource, inittime=None, fh=None, varname=None, **kwargs):
+        datas = list(map(fetch, requests))
+        if all([i is None for i in datas]):
+            logger.exception(f"all requests failed.")
+            raise Exception(f"all requests failed.")
+        if merge:
+            if isinstance(datas, list):
+                if isinstance(datas[0], xr.DataArray):
+                    if all([d.time == datas[0].time for d in datas]):
+                        leadtime = xr.DataArray(datas[0].time.values, dims='time')
+                        print(datas)
+                        datas = [d.set_index(time='inittime').assign_coords(leadtime=leadtime) for d in datas]
+                    datas = xr.merge(datas)
+                elif isinstance(datas[0], pd.DataFrame):
+                    datas = pd.concat(datas)
+            elif isinstance(datas, xr.DataArray):
+                datas = datas.to_datas()
+            elif isinstance(datas, (list, xr.Dataset, pd.DataFrame, pd.Series)):
+                pass
+            else:
+                raise NotImplementedError(datas)
+            return datas
+        else:
+            return datas if len(requests) > 1 else datas[0]
+
+    def _sel(self, datasource, inittime=None, fh=None, varname=None, leadtime=None, **kwargs):
         """Sel file variable on remote workers
 
         Parameters
@@ -90,8 +112,16 @@ class MdfsClient(Http):
         if level is not None:
             directory += f'/{level}'
 
+        assert inittime is not None or leadtime is not None
+
         if fh is None:
-            fh = 0
+            if leadtime is not None and inittime is not None:
+                fh = int((leadtime - inittime).total_seconds() / 3600.)
+            else:
+                fh = 0
+
+        if inittime is None:
+            inittime = leadtime - timedelta(hours=fh)
 
         wildcard = kwargs.pop('wildcard', None)
         if wildcard is None:
@@ -460,4 +490,3 @@ class MdfsClient(Http):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         del self.__basicUrl
-
