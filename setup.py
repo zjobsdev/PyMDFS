@@ -16,10 +16,10 @@ install_requires = [
     "pandas",
     "logzero>=1.0",
     "pyyaml",
-    "protobuf<=3.20",
+    "protobuf",
     "retrying",
     "httplib2",
-    "netCDF4<=1.5.8",
+    "netCDF4",
 ]
 
 classifiers = [
