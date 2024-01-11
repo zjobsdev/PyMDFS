@@ -14,7 +14,7 @@ from pymdfs import MdfsClient
 
 
 def _main():
-    example_text = """Example: client_query ECMWF_HR"""
+    example_text = """Example: mdfs_query ECMWF_HR"""
 
     parser = argparse.ArgumentParser(description='MDFS Data Query',
                                      epilog=example_text,

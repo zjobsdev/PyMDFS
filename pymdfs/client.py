@@ -73,10 +73,9 @@ class MdfsClient(Http):
             raise Exception(f"all requests failed.")
         if merge:
             if isinstance(datas, list):
-                if isinstance(datas[0], xr.DataArray):
-                    if all([d.time == datas[0].time for d in datas]):
+                if isinstance(datas[0], (xr.DataArray, xr.Dataset)):
+                    if len(inittime) > 1 and all([d.time == datas[0].time for d in datas]):
                         leadtime = xr.DataArray(datas[0].time.values, dims='time')
-                        print(datas)
                         datas = [d.set_index(time='inittime').assign_coords(leadtime=leadtime) for d in datas]
                     datas = xr.merge(datas)
                 elif isinstance(datas[0], pd.DataFrame):
@@ -88,8 +87,7 @@ class MdfsClient(Http):
             else:
                 raise NotImplementedError(datas)
             return datas
-        else:
-            return datas if len(requests) > 1 else datas[0]
+        return datas if len(requests) > 1 else datas[0]
 
     def _sel(self, datasource, inittime=None, fh=None, varname=None, leadtime=None, **kwargs):
         """Sel file variable on remote workers
