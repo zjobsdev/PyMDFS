@@ -155,7 +155,7 @@ class LatLon(object):
         name = head.varname
         dims = ('time', 'lat', 'lon')
         coords = {'time': [time], 'lat': lats, 'lon': lons}
-        data = xr.DataArray(self.data[None, ...], dims=dims, coords=coords, name=name, attrs=attrs)
+        data = xr.DataArray(self.data[None, ::-1], dims=dims, coords=coords, name=name, attrs=attrs)
 
         return data
 
