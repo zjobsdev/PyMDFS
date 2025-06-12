@@ -114,7 +114,7 @@ class MdfsStationData(object):
         else:
             bytes_array = path_or_bytes
 
-        head_data = unpack('=4sh100sf50siiiiiii100s', bytes_array[:288])
+        head_data = unpack('=4sh100sf50siiiiiiih98s', bytes_array[:288])
         self.head = MdfsStationHead(*head_data)
 
         stationNum, elementNum = unpack("=ih", bytes_array[288:288 + 6])
@@ -131,27 +131,33 @@ class MdfsStationData(object):
         data = {}
         _id_dict = self._load_id_description()
         for i in range(stationNum):
-            data_head = list(unpack("=iffh", bytes_array[p:p + 14]))
-            p += 14
+            if self.head.station_code_flag == 0:
+                data_head = list(unpack("=iffh", bytes_array[p:p + 14]))
+                p += 14
+            else:
+                station_code_length = unpack("=h", bytes_array[p:p + 2])[0]
+                data_head = list(unpack(f"={station_code_length}sffh", bytes_array[p + 2:p + station_code_length + 12]))
+                data_head[0] = data_head[0].decode()
+                p += station_code_length + 12
 
             element = {"站号": data_head[0], "经度": data_head[1], "纬度": data_head[2]}
             for j in range(data_head[-1]):
                 element_id = unpack("=h", bytes_array[p:p + 2])[0]
                 p += 2
                 element_type = self._element_type_dict[elementIdTypeMap[element_id]]
-                elemet_value = \
-                    unpack("=" + element_type, bytes_array[p:p + calcsize("=" + element_type)])[0]
-                element[_id_dict.get(element_id, element_id)] = elemet_value
+                elemet_value = unpack("=" + element_type, bytes_array[p:p + calcsize("=" + element_type)])[0]
+                vname = _id_dict.get(element_id, element_id)
+                if element_id > 200 and element_id % 2 == 0:
+                    vname = _id_dict.get(element_id - 1, element_id) + '_质控码'
+                element[vname] = elemet_value
                 p += calcsize("=" + element_type)
                 data[data_head[0]] = element
         self.data = data
         self._ds = self.to_dataframe()
-        self._ds.insert(0, '观测时间', datetime(*[getattr(self.head, k)
-                                                  for k in ('year', 'month', 'day', 'hour', 'minute', 'second')]))
 
     @property
     def _element_type_dict(self) -> dict:
-        return {1: 'b', 2: 'h', 3: 'i', 4: 'l', 5: 'f', 6: 'd', 7: 's'}
+        return {1: 'b', 2: 'h', 3: 'i', 4: 'q', 5: 'f', 6: 'd', 7: 's'}
 
     def _load_id_description(self, pathfile: str = '../config/ElementNameDict.yml'):
         if not os.path.isfile(pathfile):
@@ -164,7 +170,15 @@ class MdfsStationData(object):
             return yaml.load(f, Loader=yaml.SafeLoader)
 
     def to_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame.from_dict(self.data, orient='index')
+        df = pd.DataFrame.from_dict(self.data, orient='index')
+        df.pop('站号')
+        convert = lambda d: chr(d) if d >= 10 else d
+        if pd.api.types.is_integer_dtype(df.index.dtype):
+            df.index = (df.index / 1e4).astype(int).map(convert).astype(str) + df.index.astype(str).str[-4:]
+        df.index.name = '站号'
+        df['观测时间'] = datetime(*[getattr(self.head, k) for k in ('year', 'month', 'day', 'hour', 'minute', 'second')])
+        df.set_index('观测时间', append=True, inplace=True)
+        return df
 
     def __enter__(self):
         return self
