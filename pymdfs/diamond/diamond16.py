@@ -88,7 +88,7 @@ class Diamond16:
         df (pd.DataFrame): selected data
         """
         df = self._ds
-        for slice_, ele_ in zip((stid, lon, lat, level), self.index_cols):
+        for slice_, ele_ in zip((stid, lat, lon, level), self.index_cols):
             if slice_ is not None:
                 if isinstance(slice_, slice):
                     df = df[(df[ele_] >= slice_.start) & (df[ele_] <= slice_.stop)]
@@ -127,7 +127,10 @@ class Diamond16:
         ncols = len(data[headsize:]) / self.head.nrec
         if not ncols.is_integer():
             raise Exception("Data can't be splitted into integer columns.")
-        self.data = np.asfarray(data[headsize:]).reshape((self.head.nrec, int(ncols)))
+        data = np.asfarray(data[headsize:]).reshape((self.head.nrec, int(ncols)))
+        deg = np.floor(data[:, 1:3] / 100)
+        data[:, 1:3] = deg + (data[:, 1:3] / 100 - deg) * 100. / 60.
+        self.data = data
         self._ds = self.to_frame()
 
     def write(self, pathfile: str, encoding: str = 'GBK', fmt: str = '%5i%8i%8i%4i'):
@@ -152,19 +155,19 @@ class Diamond16:
     @property
     def dtype(self):
         """column data type"""
-        dtypes = [('stid', 'i4'), ('lon', 'f4'), ('lat', 'f4'), ('level', 'i1')]
+        dtypes = [('stid', 'i4'), ('lat', 'f4'), ('lon', 'f4'), ('level', 'i1')]
         return np.dtype(dtypes)
 
     @property
     def names(self):
         """column-name dictionary"""
-        names = [('stid', '区站号'), ('lon', '经度'), ('lat', '纬度'), ('level', '站点级别')]
+        names = [('stid', '区站号'), ('lat', '纬度'), ('lon', '经度'), ('level', '站点级别')]
         return dict(names)
 
     @property
     def index_cols(self):
         """base index columns, keep in frame when select data"""
-        return ['stid', 'lon', 'lat', 'level']
+        return ['stid', 'lat', 'lon', 'level']
 
     def to_numpy(self):
         """Convert instance into numpy array with dtypes
