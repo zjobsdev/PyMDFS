@@ -38,7 +38,7 @@ def args_parser(s: str) -> Union[slice, list, int, float, str]:
     s: str
         argument string, special chars and its meaning as following,
         - , represents slice from it's left to right, step can also be place the last
-        /, represents list from split by /
+        , , represents list from split by ,
 
     Returns
     -------
@@ -65,7 +65,7 @@ def time_parser(s: str) -> list:
     ----------
     s: str
         - , start-end-step, represents date range from it's left to right, time freq must be place the last
-        /, time1/time2/time3, represents list from split by /
+        , , time1,time2,time3, represents list from split by ,
 
     Returns
     -------
@@ -133,7 +133,8 @@ def _main():
     parser.add_argument('-s', '--server', type=str, help='GDS server address',
                         default='xxx.xxx.xxx.xxx:xxxx')
     parser.add_argument('--method', help='interpolate method to target points', default='nearest')
-    parser.add_argument('-o', '--loglevel', type=int, help='logger level in number', default=20)
+    parser.add_argument('-o', '--loglevel', type=int, help='logger level',
+                        default=20, choices=range(10, 51, 10))
 
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
