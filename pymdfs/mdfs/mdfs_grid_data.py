@@ -73,10 +73,11 @@ class MdfsGridData(object):
         -------
         dar (xarray.DataArray, xarray.Dataset): sel variable
         """
-        if self._ds.indexes['lat'].is_monotonic_decreasing:
-            if 'lat' in kwargs and isinstance(kwargs.get('lat'), slice):
+        if 'lat' in kwargs and isinstance(kwargs.get('lat'), slice):
+            if self._ds.indexes['lat'].is_monotonic_decreasing:
                 lat = kwargs.get('lat')
                 kwargs['lat'] = slice(lat.stop, lat.start, lat.step)
+
         dar = self._ds.sel(**kwargs)
         return dar
 
@@ -142,8 +143,8 @@ class MdfsGridData(object):
             return data
 
         head = self.head
-        lons = np.linspace(head.startLongitude, head.endLongitude, head.latitudeGridNumber)
-        lats = np.linspace(head.startLatitude, head.endLatitude, head.longitudeGridNumber)
+        lons = np.linspace(round(head.startLongitude, 4), round(head.endLongitude, 4), head.latitudeGridNumber)
+        lats = np.linspace(round(head.startLatitude, 4), round(head.endLatitude, 4), head.longitudeGridNumber)
 
         inittime = datetime(head.year, head.month, head.day, head.hour)
         fh = self.head.period
